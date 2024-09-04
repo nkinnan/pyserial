@@ -295,7 +295,7 @@ class Serial(SerialBase):
                         ctypes.byref(rc),
                         millis,
                         False)
-                    if result_ok or win32.GetLastError() not in (win32.WAIT_TIMEOUT, win32.ERROR_IO_INCOMPLETE):
+                    if result_ok or win32.GetLastError() != win32.WAIT_TIMEOUT:
                         break
                     if timeout.expired():
                         break
@@ -337,7 +337,7 @@ class Serial(SerialBase):
                         ctypes.byref(n), 
                         millis, 
                         False)
-                    if result_ok or win32.GetLastError() not in (win32.WAIT_TIMEOUT, win32.ERROR_IO_INCOMPLETE):
+                    if result_ok or win32.GetLastError() != win32.WAIT_TIMEOUT:
                         break
                     if timeout.expired():
                         break
