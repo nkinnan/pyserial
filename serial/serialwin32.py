@@ -331,7 +331,7 @@ class Serial(SerialBase):
                     millis = win32.DWORD(int(min(timeout.time_left() or 0.1, 0.1) * 1000))
                     # Wait for the write to complete.
                     #~ win32.WaitForSingleObject(self._overlapped_write.hEvent, win32.INFINITE)
-                    win32.GetOverlappedResultEx(
+                    result_ok = win32.GetOverlappedResultEx(
                         self._port_handle, 
                         self._overlapped_write, 
                         ctypes.byref(n), 
