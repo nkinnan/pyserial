@@ -285,10 +285,12 @@ class Serial(SerialBase):
                     ctypes.byref(self._overlapped_read))
                 if not read_ok and win32.GetLastError() not in (win32.ERROR_SUCCESS, win32.ERROR_IO_PENDING):
                     raise SerialException("ReadFile failed ({!r})".format(ctypes.WinError()))
-                timeout = Timeout(self._timeout)
+                # some dependencies rely on the broken timeout behavior, so avoiding fixing that for now
+                # timeout = Timeout(self._timeout)
                 while True:
                     # even with timeout infinite, return from kernel mode every 100ms to allow for things like KeyboardInterrupt to happen
-                    millis = win32.DWORD(int(min(timeout.time_left() or 0.1, 0.1) * 1000))
+                    # millis = win32.DWORD(int(min(timeout.time_left() or 0.1, 0.1) * 1000))
+                    millis = 100
                     result_ok = win32.GetOverlappedResultEx(
                         self._port_handle,
                         ctypes.byref(self._overlapped_read),
@@ -297,8 +299,8 @@ class Serial(SerialBase):
                         False)
                     if result_ok or win32.GetLastError() != win32.WAIT_TIMEOUT:
                         break
-                    if timeout.expired():
-                        break
+                    # if timeout.expired():
+                    #     break
                 if not result_ok:
                     if win32.GetLastError() != win32.ERROR_OPERATION_ABORTED:
                         raise SerialException("GetOverlappedResult failed ({!r})".format(ctypes.WinError()))
@@ -324,13 +326,13 @@ class Serial(SerialBase):
             if self._write_timeout != 0:  # if blocking (None) or w/ write timeout (>0)
                 if not success and win32.GetLastError() not in (win32.ERROR_SUCCESS, win32.ERROR_IO_PENDING):
                     raise SerialException("WriteFile failed ({!r})".format(ctypes.WinError()))
-
-                timeout = Timeout(self._timeout)
+                # some dependencies rely on the broken timeout behavior, so avoiding fixing that for now
+                # timeout = Timeout(self._timeout)
                 while True:
                     # even with timeout infinite, return from kernel mode every 100ms to allow for things like KeyboardInterrupt to happen
-                    millis = win32.DWORD(int(min(timeout.time_left() or 0.1, 0.1) * 1000))
+                    # millis = win32.DWORD(int(min(timeout.time_left() or 0.1, 0.1) * 1000))
+                    millis = 100
                     # Wait for the write to complete.
-                    #~ win32.WaitForSingleObject(self._overlapped_write.hEvent, win32.INFINITE)
                     result_ok = win32.GetOverlappedResultEx(
                         self._port_handle, 
                         self._overlapped_write, 
@@ -339,8 +341,8 @@ class Serial(SerialBase):
                         False)
                     if result_ok or win32.GetLastError() != win32.WAIT_TIMEOUT:
                         break
-                    if timeout.expired():
-                        break
+                    # if timeout.expired():
+                    #     break
                 if win32.GetLastError() == win32.ERROR_OPERATION_ABORTED:
                     return n.value  # canceled IO is no error
                 if n.value != len(data):
